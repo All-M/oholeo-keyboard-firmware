@@ -11,7 +11,11 @@ typedef enum
     KEY_EVENT_DOWN,
     EVENT_NUM
 } KEY_EVENT;
+
+
 typedef void (*key_cb_t)(void *);
+
+
 typedef struct __Key
 {
     uint16_t id;
@@ -19,8 +23,11 @@ typedef struct __Key
     bool report_state;
     key_cb_t key_cb[EVENT_NUM];
 } Key;
+
+
 void key_update(Key *key, bool state);
 void key_attach(Key *key, KEY_EVENT e, key_cb_t cb);
+
 
 typedef enum
 {
@@ -29,6 +36,7 @@ typedef enum
     KEY_ANALOG_RAPID_MODE,
     KEY_ANALOG_SPEED_MODE
 } KeyMode;
+
 
 typedef struct __AdvancedKey
 {
@@ -54,6 +62,7 @@ typedef struct __AdvancedKey
     float lower_bound;
 } AdvancedKey;
 
+
 void advanced_key_init(AdvancedKey *key);
 void advanced_key_update(AdvancedKey *key, float value);
 void advanced_key_update_raw(AdvancedKey *key, float value);
@@ -61,4 +70,6 @@ void advanced_key_update_state(AdvancedKey *key, bool state);
 float advanced_key_normalize(AdvancedKey *key, float value);
 void advanced_key_set_range(AdvancedKey *key, float upper, float lower);
 void advanced_key_set_deadzone(AdvancedKey *key, float upper, float lower);
+
+
 #endif

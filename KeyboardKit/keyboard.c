@@ -11,19 +11,23 @@
 #include "lfs.h"
 #include "main.h"
 
-uint8_t g_keyboard_report_buffer[HID_BUFFER_LENGTH];
-bool Keybaord_SendReport_Enable;
-uint16_t g_keymap[LAYER_NUM][ADVANCED_KEY_NUM + KEY_NUM];
+
+uint8_t             g_keyboard_report_buffer[HID_BUFFER_LENGTH];
+bool                Keybaord_SendReport_Enable;
+uint16_t            g_keymap[LAYER_NUM][ADVANCED_KEY_NUM + KEY_NUM];
 Keyboard_6KROBuffer g_keyboard_6kro_buffer;
 
-uint8_t g_keyboard_knob_flag;
-volatile bool g_keybaord_send_report_enable = true;
-volatile bool g_keybaord_alpha_flag;
-volatile bool g_keybaord_shift_flag;
+uint8_t             g_keyboard_knob_flag;
+
+volatile bool       g_keybaord_send_report_enable = true;
+volatile bool       g_keybaord_alpha_flag;
+volatile bool       g_keybaord_shift_flag;
+
 
 int keyboard_6KRObuffer_add(Keyboard_6KROBuffer* buf, uint16_t key)
 {
     buf->buffer[0] |= KEY_MODIFIER(key);
+
     if (KEY_KEYCODE(key) != KEY_NO_EVENT && buf->keynum < 6)
     {
         buf->buffer[2 + buf->keynum] = KEY_KEYCODE(key);
@@ -31,54 +35,65 @@ int keyboard_6KRObuffer_add(Keyboard_6KROBuffer* buf, uint16_t key)
         return 0;
     }
     else
-    {
         return 1;
-    }
 }
+
 
 void keyboard_6KRObuffer_send(Keyboard_6KROBuffer* buf)
 {
     keyboard_hid_send(buf->buffer, sizeof(buf->buffer));
 }
 
+
 void keyboard_6KRObuffer_clear(Keyboard_6KROBuffer* buf)
 {
     memset(buf, 0, sizeof(Keyboard_6KROBuffer));
 }
+
 
 void keyboard_init()
 {
     memcpy(g_keymap, g_default_keymap, sizeof(g_keymap));
 }
 
+
 void keyboard_factory_reset()
 {
     memcpy(g_keymap,g_default_keymap,sizeof(g_keymap));
-    for (uint8_t i = 0; i < ADVANCED_KEY_NUM; i++)
+
+    for(uint8_t i = 0; i < ADVANCED_KEY_NUM; i++)
     {
-        g_keyboard_advanced_keys[i].mode = DEFAULT_ADVANCED_KEY_MODE;
-        g_keyboard_advanced_keys[i].trigger_distance = DEFAULT_TRIGGER_DISTANCE;
-        g_keyboard_advanced_keys[i].release_distance = DEFAULT_RELEASE_DISTANCE;
-        g_keyboard_advanced_keys[i].schmitt_parameter = DEFAULT_SCHMITT_PARAMETER;
-        g_keyboard_advanced_keys[i].activation_value = 0.3;
-        // Keyboard_AdvancedKeys[i].lower_deadzone = 0.32;
+        g_keyboard_advanced_keys[i].mode                = DEFAULT_ADVANCED_KEY_MODE;
+        g_keyboard_advanced_keys[i].trigger_distance    = DEFAULT_TRIGGER_DISTANCE;
+        g_keyboard_advanced_keys[i].release_distance    = DEFAULT_RELEASE_DISTANCE;
+        g_keyboard_advanced_keys[i].schmitt_parameter   = DEFAULT_SCHMITT_PARAMETER;
+        g_keyboard_advanced_keys[i].activation_value    = 0.3;
+//      Keyboard_AdvancedKeys[i].lower_deadzone         = 0.32;
+
         advanced_key_set_deadzone(g_keyboard_advanced_keys + i, DEFAULT_UPPER_DEADZONE, DEFAULT_LOWER_DEADZONE);
-        // Keyboard_AdvancedKeys[i].phantom_lower_deadzone = 0.32;
-        // Keyboard_AdvancedKeys[i].key.keycode = default_keymap[0][Keyboard_AdvancedKeys[i].key.id];
+
+//      Keyboard_AdvancedKeys[i].phantom_lower_deadzone = 0.32;
+//      Keyboard_AdvancedKeys[i].key.keycode            = default_keymap[0][Keyboard_AdvancedKeys[i].key.id];
     }
+
     rgb_recovery();
     keyboard_save();
-    //keyboard_system_reset();
+//  keyboard_system_reset();
 }
+
+
 void keyboard_system_reset()
 {
     __set_FAULTMASK(1);
     NVIC_SystemReset();
 }
 
+
 __WEAK void keyboard_scan()
 {
 }
+
+
 void keyboard_recovery()
 {
     // mount the filesystem

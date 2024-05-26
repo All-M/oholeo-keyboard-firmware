@@ -182,7 +182,7 @@ __ALIGN_BEGIN static uint8_t CUSTOM_HID_ReportDesc_FS[USBD_CUSTOM_HID_REPORT_DES
 };
 
 /* USER CODE BEGIN PRIVATE_VARIABLES */
-extern uint8_t USB_Recive_Buffer[USBD_CUSTOMHID_OUTREPORT_BUF_SIZE]; //USB接收缓存
+extern uint8_t USB_Receive_Buffer[USBD_CUSTOMHID_OUTREPORT_BUF_SIZE]; //USB接收缓存
 extern uint8_t USB_Received_Count;//USB接收数据计数
 /* USER CODE END PRIVATE_VARIABLES */
 
@@ -270,12 +270,12 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
    USBD_CUSTOM_HID_HandleTypeDef   *hhid; //定义一个指向USBD_CUSTOM_HID_HandleTypeDef结构体的指针
    hhid = (USBD_CUSTOM_HID_HandleTypeDef*)hUsbDeviceFS.pClassData;//得到USB接收数据的储存地址
 
-   memcpy(USB_Recive_Buffer, hhid->Report_buf, sizeof(USB_Recive_Buffer));
-   if(USB_Recive_Buffer[0]==1) {
-	   LED_Report = USB_Recive_Buffer[1];
+   memcpy(USB_Receive_Buffer, hhid->Report_buf, sizeof(USB_Receive_Buffer));
+   if(USB_Receive_Buffer[0]==1) {
+	   LED_Report = USB_Receive_Buffer[1];
    }
-   if(USB_Recive_Buffer[0]==2) {
-	   uint8_t page_num = USB_Recive_Buffer[1];
+   if(USB_Receive_Buffer[0]==2) {
+	   uint8_t page_num = USB_Receive_Buffer[1];
 	   enum state_t {
 			NORMAL,
 			ADC,
@@ -296,47 +296,47 @@ static int8_t CUSTOM_HID_OutEvent_FS(uint8_t event_idx, uint8_t state)
 		   global_state = REQUEST_SAVE;
 	   }
 	   if(page_num == 253) {
-		   //softwate control factoryreset
+		   //software control factoryreset
 		   global_state = FACTORYRESET;
 	   }
 	   if(page_num<16) {  ///performance
 		   for(int i=0;i<4;i++) {
-			   if(USB_Recive_Buffer[2+i*4+0]&0x80){
+			   if(USB_Receive_Buffer[2+i*4+0]&0x80){
 				   g_keyboard_advanced_keys[api_lut[page_num*4+i]].mode = KEY_ANALOG_RAPID_MODE;
-				   g_keyboard_advanced_keys[api_lut[page_num*4+i]].trigger_distance = (float)USB_Recive_Buffer[2+i*4+1]/100.0;
-				   g_keyboard_advanced_keys[api_lut[page_num*4+i]].release_distance = (float)USB_Recive_Buffer[2+i*4+2]/100.0;
-				   g_keyboard_advanced_keys[api_lut[page_num*4+i]].phantom_lower_deadzone = (float)USB_Recive_Buffer[2+i*4+3]/100.0;
-				   advanced_key_set_deadzone(&g_keyboard_advanced_keys[api_lut[page_num*4+i]], 0.02, (float)USB_Recive_Buffer[2+i*4+3]/100.0);
-	//			   Keyboard_AdvancedKeys[api_lut[page_num*4+i]].lower_deadzone = (float_t)USB_Recive_Buffer[2+i*4+3]/100.0;
+				   g_keyboard_advanced_keys[api_lut[page_num*4+i]].trigger_distance = (float)USB_Receive_Buffer[2+i*4+1]/100.0;
+				   g_keyboard_advanced_keys[api_lut[page_num*4+i]].release_distance = (float)USB_Receive_Buffer[2+i*4+2]/100.0;
+				   g_keyboard_advanced_keys[api_lut[page_num*4+i]].phantom_lower_deadzone = (float)USB_Receive_Buffer[2+i*4+3]/100.0;
+				   advanced_key_set_deadzone(&g_keyboard_advanced_keys[api_lut[page_num*4+i]], 0.02, (float)USB_Receive_Buffer[2+i*4+3]/100.0);
+	//			   Keyboard_AdvancedKeys[api_lut[page_num*4+i]].lower_deadzone = (float_t)USB_Receive_Buffer[2+i*4+3]/100.0;
 			   } else {
 				   g_keyboard_advanced_keys[api_lut[page_num*4+i]].mode = KEY_ANALOG_NORMAL_MODE;
-//				   Keyboard_AdvancedKeys[api_lut[page_num*4+i]].trigger_distance = (float)USB_Recive_Buffer[2+i*4+0]/100.0;
-				   g_keyboard_advanced_keys[api_lut[page_num*4+i]].activation_value = (float)USB_Recive_Buffer[2+i*4+0]/100.0;
+//				   Keyboard_AdvancedKeys[api_lut[page_num*4+i]].trigger_distance = (float)USB_Receive_Buffer[2+i*4+0]/100.0;
+				   g_keyboard_advanced_keys[api_lut[page_num*4+i]].activation_value = (float)USB_Receive_Buffer[2+i*4+0]/100.0;
 				   advanced_key_set_deadzone(&g_keyboard_advanced_keys[api_lut[page_num*4+i]], 0.02, 0.0);
 			   }
 		   }
 	   } else if(page_num<32) {  ///rgb
 		   page_num %= 16; // needed
 		   for(int i=0;i<4;i++) {
-			   g_rgb_global_config.mode = USB_Recive_Buffer[2+i*4+0]>>4;
-			   g_rgb_global_config.rgb = *(ColorRGB *)&USB_Recive_Buffer[2+i*4+1];
+			   g_rgb_global_config.mode = USB_Receive_Buffer[2+i*4+0]>>4;
+			   g_rgb_global_config.rgb = *(ColorRGB *)&USB_Receive_Buffer[2+i*4+1];
 			   rgb_to_hsv(&g_rgb_global_config.hsv, &g_rgb_global_config.rgb);
-			   g_rgb_configs[g_rgb_mapping[api_lut[page_num*4+i]]].mode = USB_Recive_Buffer[2+i*4+0]&0x0f;
-			   g_rgb_configs[g_rgb_mapping[api_lut[page_num*4+i]]].rgb = *(ColorRGB *)&USB_Recive_Buffer[2+i*4+1];
+			   g_rgb_configs[g_rgb_mapping[api_lut[page_num*4+i]]].mode = USB_Receive_Buffer[2+i*4+0]&0x0f;
+			   g_rgb_configs[g_rgb_mapping[api_lut[page_num*4+i]]].rgb = *(ColorRGB *)&USB_Receive_Buffer[2+i*4+1];
 			   rgb_to_hsv(&g_rgb_configs[g_rgb_mapping[api_lut[page_num*4+i]]].hsv, &g_rgb_configs[g_rgb_mapping[api_lut[page_num*4+i]]].rgb);
 
 		   }
 	   } else if(page_num<48) {  ///keycode
 		   page_num %= 16; // needed
 		   for(int i=0;i<4;i++) {
-			   g_keymap[0][g_keyboard_advanced_keys[api_lut[page_num*4+i]].key.id] = USB_Recive_Buffer[2+i*4+0] << 8 | USB_Recive_Buffer[2+i*4+1];
+			   g_keymap[0][g_keyboard_advanced_keys[api_lut[page_num*4+i]].key.id] = USB_Receive_Buffer[2+i*4+0] << 8 | USB_Receive_Buffer[2+i*4+1];
 		   }
 	   }
    }
 //   if(USB_Recive_Buffer[0]==2)USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS,USB_Recive_Buffer,33);
 //   for(i=0;i<USB_Received_Count;i++)
 //   {
-//       USB_Recive_Buffer[i]=hhid->Report_buf[i];  //把接收到的数据送到自定义的缓存区保存（Report_buf[i]为USB的接收缓存区）
+//       USB_Receive_Buffer[i]=hhid->Report_buf[i];  //把接收到的数据送到自定义的缓存区保存（Report_buf[i]为USB的接收缓存区）
 //   }
   return (USBD_OK);
   /* USER CODE END 6 */
